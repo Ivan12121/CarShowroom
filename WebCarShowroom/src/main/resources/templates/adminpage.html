@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Car Showroom</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container px-4 py-5" id="featured-3">
+    <h2 class="pb-2 border-bottom" th:text="${hi}"></h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="feature col">
+            <div class="feature-icon bg-primary bg-gradient">
+                <img th:src="@{/images/person-check.svg}" alt="" width="32" height="32">
+            </div>
+            <h2>Клиенты</h2>
+            <p>Просмотреть всю информацию о клиентах</p>
+            <a href="/allbuyeradmin">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Просмотреть</button>
+            </a>
+            <a href="/allorderuser">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Просмотреть все операции</button>
+            </a>
+            <a href="/allcarorder">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Просмотреть все активные заказы</button>
+            </a>
+        </div>
+        <div class="feature col">
+            <div class="feature-icon bg-primary bg-gradient">
+                <img th:src="@{/images/minecart.svg}" alt="" width="32" height="32">
+            </div>
+            <h2>Машины</h2>
+            <p>Просмотреть всю информацию о машинах, изменить или добавить новую</p>
+            <a href="/allcarsadmin">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Просмотреть</button>
+            </a>
+            <a href="/addoreditcar">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Добавить/Изменить</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
