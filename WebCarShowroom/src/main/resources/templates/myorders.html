@@ -15,7 +15,7 @@
         </a>
 
         <ul class="nav nav-pills">
-            <li class="nav-item"><a href="/cabinet/authorization" class="nav-link active" aria-current="page">Кабинет</a></li>
+            <li class="nav-item"><a href="/cabinet" class="nav-link active" aria-current="page">Кабинет</a></li>
         </ul>
     </header>
 </div>
@@ -28,7 +28,7 @@
         <br>
         <strong th:text="${el.status}"></strong>
         <br>
-        <strong th:text="${el.carsList}"></strong>
+        <strong text="${el.carsList}"></strong>
         <br>
         <a th:href="'/myorders/' + ${el.idhistory}">
             <button type="button" class="btn btn-sm btn-outline-secondary">Отменить</button>

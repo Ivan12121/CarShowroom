@@ -29,6 +29,7 @@
                 <div class="row g-3">
                     <div class="col-sm-6">
                         <label for="firstName" class="form-label">Имя</label>
+                        <strong th:text="${errorName}"></strong>
                         <input type="text" class="form-control" name="name" id="firstName" placeholder="Введите имя" value="" required="">
                         <div class="invalid-feedback">
                             Valid first name is required.
@@ -45,6 +46,7 @@
 
                     <div class="col-12">
                         <label for="email" class="form-label">Email <span class="text-muted">(Optional)</span></label>
+                        <strong th:text="${errorEmail}"></strong>
                         <input type="email" class="form-control" name="email" id="email" placeholder="you@example.com">
                         <div class="invalid-feedback">
                             Please enter a valid email address for shipping updates.

@@ -11,14 +11,23 @@
     <h1>Ваши заказы</h1>
     <div th:each="el : ${users}" class="alert alert-info mt-2">
         <h3 th:text="${el.name} + ' ' + ${el.lastname}"></h3>
+        <strong>Email: </strong>
         <strong th:text="${el.email}"></strong>
         <br>
+        <strong>Country: </strong>
         <strong th:text="${el.country}"></strong>
         <br>
+        <strong>Role: </strong>
         <strong th:text="${el.role}"></strong>
         <br>
+        <strong>Future flag: </strong>
+        <strong th:text="${el.futureFlag}"></strong>
+        <br>
         <a th:href="'/allbuyeradmin/' + ${el.id}">
-            <button type="button" class="btn btn-sm btn-outline-secondary">Назначить админом</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Изменить роль</button>
+        </a>
+        <a th:href="'/shopoff/' + ${el.id}">
+            <button type="button" class="btn btn-sm btn-outline-secondary">Изменить доступ к магазину</button>
         </a>
     </div>
 

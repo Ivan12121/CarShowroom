@@ -1,5 +1,8 @@
 package com.carShowroom.WebCarShowroom.models;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,6 +20,7 @@ public class Users {
     private String email;
     private String country;
     private String role;
+    private String futureFlag;
 
     @OneToMany(mappedBy = "cards", fetch = FetchType.EAGER)
     private Set<Card> cardsUser = new HashSet<>();
@@ -24,6 +28,7 @@ public class Users {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<History> history = new ArrayList<>();
 
+    @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany
     @JoinTable(name="cars_users",
             joinColumns = @JoinColumn(name = "idusers"),
@@ -34,7 +39,7 @@ public class Users {
 
     }
 
-    public Users(String name, String lastname, String email, String country, String role, List<Cars> carsUser, Set<Card> cardsUser) {
+    public Users(String name, String lastname, String email, String country, String role, List<Cars> carsUser, Set<Card> cardsUser, String futureFlag) {
         this.name = name;
         this.lastname = lastname;
         this.email = email;
@@ -42,6 +47,7 @@ public class Users {
         this.role = role;
         this.carsUser = carsUser;
         this.cardsUser = cardsUser;
+        this.futureFlag = futureFlag;
     }
 
     public List<History> getHistory() {
@@ -114,5 +120,13 @@ public class Users {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getFutureFlag() {
+        return futureFlag;
+    }
+
+    public void setFutureFlag(String futureFlag) {
+        this.futureFlag = futureFlag;
     }
 }

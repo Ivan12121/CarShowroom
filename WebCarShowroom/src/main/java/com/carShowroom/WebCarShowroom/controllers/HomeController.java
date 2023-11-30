@@ -25,7 +25,7 @@ public class HomeController {
     }
 
     @GetMapping("/home/shop")
-    public String shopHome(Model model) {
+    public String shopPage(Model model) {
         model.addAttribute("title", "Эконом класс");
         return "redirect:/shop";
     }

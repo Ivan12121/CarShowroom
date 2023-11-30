@@ -8,89 +8,69 @@ import com.carShowroom.WebCarShowroom.repository.CardRepository;
 import com.carShowroom.WebCarShowroom.repository.CarsRepository;
 import com.carShowroom.WebCarShowroom.repository.HistoryRepositories;
 import com.carShowroom.WebCarShowroom.repository.UsersRepository;
+import com.carShowroom.WebCarShowroom.utilits.ConstFields;
+import com.carShowroom.WebCarShowroom.utilits.Functions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 @Controller
-public class CabinetController {
+public class CabinetController extends ConstFields {
 
     @Autowired
-    UsersRepository usersRepository;
-
-    @Autowired
-    CarsRepository carsRepository;
-
-    @Autowired
-    CardRepository cardRepository;
-
-    @Autowired
-    HistoryRepositories historyRepositories;
-
-    public Users userGlobal;
+    Functions func;
 
     @GetMapping("/cabinet")
-    public String cabinet(@ModelAttribute("user") Users user, Model model) {
-        userGlobal = user;
+    public String cabinet(HttpSession session, Model model) {
+        Users user = (Users) session.getAttribute("user");
+        if(user.getFutureFlag().equals("off")) {
+            model.addAttribute("futureFlagInfo", "Доступ в магазин закрыт, по вопросам обращайтесь в поддержку");
+        } else  model.addAttribute("futureFlagInfo", "");
         model.addAttribute("name", user.getName());
         model.addAttribute("lastname", user.getLastname());
         return "cabinet";
     }
 
     @GetMapping("/cabinet/shop")
-    public String cabinetShop(RedirectAttributes redirectAttributes, Model model) {
-        redirectAttributes.addAttribute("user", userGlobal);
+    public String cabinetShop(HttpSession session, Model model) {
+        Users user = (Users) session.getAttribute("user");
+        if(user.getFutureFlag().equals("off")) {
+            session.setAttribute("user", user);
+            return "redirect:/cabinet";
+        }
+        session.setAttribute("user", user);
         return "redirect:/shop";
     }
 
-    @GetMapping("/cabinet/authorization")
-    public String authorization(RedirectAttributes redirectAttributes, Model model) {
-        redirectAttributes.addAttribute("user", userGlobal);
-        if(userGlobal == null) {
-            return "redirect:/authorization";
-        }
-        return "redirect:/cabinet";
-    }
-
     @GetMapping("/cardelete")
-    public String cardelete(RedirectAttributes redirectAttributes, Model model) {
-        redirectAttributes.addAttribute("user", userGlobal);
+    public String cardelete(HttpSession session, Model model) {
+        Users user = (Users) session.getAttribute("user");
+        session.setAttribute("user", user);
         return "redirect:/cabinet";
     }
 
+    //Page with a buyer's car
     @GetMapping("/mycarsbuy")
-    public String mycarsbuy(Model model) {
-        Users user = usersRepository.findByEmail(userGlobal.getEmail());
-        Iterable<Cars> cars = user.getCarsUser();
-        model.addAttribute("user", cars);
-        Iterable<Card> cards = user.getCardsUser();
-        model.addAttribute("card", cards);
-        int allCost = 0;
-
-        for (Cars cost: cars) {
-            allCost += cost.getCost();
-        }
-
-        model.addAttribute("cost", allCost);
-
-        return "mycarsbuy";
+    public String mycarsbuy(HttpSession session, Model model) {
+        Users user = (Users) session.getAttribute("user");
+        return func.carsInShoppingCart(user, model);
     }
 
     //удаление машины из списка
     @GetMapping("/mycarsbuy/{id}")
-    public String mycarsdelete(@PathVariable(value="id") Long id, Model model) {
+    public String mycarsdelete(HttpSession session, @PathVariable(value="id") Long id, Model model) {
         Cars cars = carsRepository.findCarById(id);
+        Users userSession = (Users) session.getAttribute("user");
+        Users user = usersRepository.findUserById(userSession.getId());
         model.addAttribute("name", cars.getName());
-        model.addAttribute("user", cars);
+        System.out.println(userSession.getId());
 
-        Users user = usersRepository.findByEmail(userGlobal.getEmail());
         cars.setQuantity(cars.getQuantity() + 1);
 
         user.getCarsUser().remove(cars);
@@ -101,108 +81,47 @@ public class CabinetController {
 
     //покупка по карте
     @GetMapping("/mycarsbuy/buy/{id}")
-    public String carsBuy(@PathVariable(value="id") Long id, Model model) {
-        Users user = usersRepository.findByEmail(userGlobal.getEmail());
+    public String carsBuy(HttpSession session, @PathVariable(value="id") Long id, Model model) {
+        Users user = (Users) session.getAttribute("user");
         Card card = cardRepository.findCardByid(id);
-        List<Cars> allCars = new ArrayList<>();
-        allCars.addAll(user.getCarsUser());
-
-
-        model.addAttribute("name", card.getCardNumber());
-        model.addAttribute("cars", allCars);
-
-        History history = new History();
-        history.setEmail(user.getEmail());
-        history.setAppointment("покупка");
-        history.setStatus("в автосалоне");
-        history.getCarsList().addAll(allCars);
-        history.setUser(user);
-        historyRepositories.save(history);
-
-        for (Cars cars: allCars) {
-            user.getCarsUser().clear();
-            usersRepository.save(user);
-        }
-
-
-        return "complitebuy";
+        return func.buyingCarsInTheCart(user, card, model);
     }
 
     @GetMapping("/mycarsbuy/orders")
-    public String myorders(Model model) {
-        Users user = usersRepository.findByEmail(userGlobal.getEmail());
-        Iterable<History> myOrders = user.getHistory();
-        List<History> hist = new ArrayList<>();
-
-        for (History h: myOrders) {
-            if(!h.getStatus().equals("отмена")) {
-                hist.add(h);
-            }
-        }
-
-        model.addAttribute("orders", hist);
-
+    public String myorders(HttpSession session, Model model) {
+        Users user = (Users) session.getAttribute("user");
+        Iterable<History> allHistory = user.getHistory();
+        List<History> history = new ArrayList<>();
+        model.addAttribute("orders", func.returnListOfActiveOrders(allHistory, history));
         return "myorders";
     }
 
     @GetMapping("/addcarduser")
     public String addcarduser(Model model) {
-        Iterable<Card> myCards = userGlobal.getCardsUser();
-        model.addAttribute("myCards", myCards);
+        model.addAttribute("str", apiClient.getTemplate("http://localhost:8082/addcarduser"));
         return "addcarduser";
     }
 
     //удаление заказа из истории клиента
     @GetMapping("/myorders/{id}")
-    public String myorderRevoke(@PathVariable(value="id") Long id, Model model) {
-        Users user = usersRepository.findByEmail(userGlobal.getEmail());
+    public String myorderRevoke(HttpSession session, @PathVariable(value="id") Long id, Model model) {
+        Users user = (Users) session.getAttribute("user");
         History history = historyRepositories.findHistoryUserByIdhistory(id);
-        List<Cars> carList = history.getCarsList();
-
-        history.setStatus("отмена");
-
-        if(history.getAppointment().equals("тест драйв")) {
-            for (Cars c: carList) {
-                c.setAvaliable(c.getAvaliable() + 1);
-            }
-        }
-        else {
-            for (Cars c: carList) {
-                c.setQuantity(c.getQuantity() + 1);
-            }
-        }
-
-        historyRepositories.save(history);
-        usersRepository.save(user);
-
-        return "revokeorder";
+        return func.removingOrderFromHistory(user, history);
     }
 
+    @GetMapping("/out")
+    public String out(HttpSession session, Model model) {
+        session.removeAttribute("user");
+        return "redirect:/shop";
+    }
+
+
     @PostMapping("/addcarduser")
-    public String addcarduserPost(RedirectAttributes redirectAttributes, @RequestParam String number, @RequestParam String validityMonth, @RequestParam String validityYear, @RequestParam String cvc, Model model) {
-        Users user = usersRepository.findByEmail(userGlobal.getEmail());
-
+    public String addcarduserPost(HttpSession session, @RequestParam String number, @RequestParam String validityMonth, @RequestParam String validityYear, @RequestParam String cvc, Model model) {
+        Users user = (Users) session.getAttribute("user");
         Card card = cardRepository.findCardByCardNumber(number);
-
-        redirectAttributes.addAttribute("user", userGlobal);
-
-
-        if(number.length() == 16 && (validityMonth.length() == 1 || validityMonth.length() == 2) && validityYear.length() == 2 && cvc.length() == 3) {
-            if(card == null) {
-                String date = validityMonth + "/" + validityYear;
-                Card newCard = new Card(number, date, cvc, user);
-                user.getCardsUser().add(newCard);
-                cardRepository.save(newCard);
-                usersRepository.save(user);
-            }
-            else {
-                model.addAttribute("error", "Такая карта уже есть");
-            }
-        }
-        else {
-            model.addAttribute("error", "Введите правильное количество цифр");
-        }
-        return "redirect:/cabinet";
+        return func.addingCreditCard(user, card, number, validityMonth, validityYear, cvc, session, model);
     }
 
 }

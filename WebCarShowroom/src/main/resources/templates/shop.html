@@ -46,7 +46,7 @@
                     <a href="/registration" class="btn btn-secondary my-2">Зарегестрироваться</a>
                 </p>
                 <p>
-                    <a href="/cabinet/authorization" class="btn btn-secondary my-2">Войти в аккаунт</a>
+                    <a href="/authorization" class="btn btn-secondary my-2">Войти в аккаунт</a>
                 </p>
             </div>
         </div>
@@ -67,6 +67,9 @@
                                 <div class="btn-group">
                                     <a th:href="'/shop/' + ${el.id}">
                                         <button type="button" class="btn btn-sm btn-outline-secondary">Все модели</button>
+                                    </a>
+                                    <a th:href="'/shop/reservation/' + ${el.id}">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary">Зарезервировать</button>
                                     </a>
                                 </div>
                                 <strong class="text-muted" th:text="${el.cost}"></strong>
